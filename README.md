@@ -8,15 +8,16 @@ Every 5 minutes it checks the website, the console, and the API's
 `GET /v1/status` (API, database and build workers), plus the backup. A
 component must fail two checks in a row before it is shown as down. The page
 shows each component's state, 90 days of daily uptime and recent incidents.
-Outages and recoveries are emailed through Resend, once per incident.
+Outages are emailed through Resend, once per incident. Recoveries are shown
+on the page only; no email is sent.
 
 - `GET /`: public status page.
 - `GET /status.json`: the same as JSON.
 - `GET|POST /ping/<token>`: record a successful backup.
 - `GET|POST /ping/<token>/fail`: record a failed backup.
 - The backup counts as down when no success has arrived for
-  `GRACE_HOURS` (26 by default). Alerts and recoveries go out by email through
-  Resend, one per incident.
+  `GRACE_HOURS` (26 by default). Failures go out by email through Resend, one
+  per incident.
 
 The token in the ping URL is a secret; the status page and JSON never show it.
 

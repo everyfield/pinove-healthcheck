@@ -89,15 +89,19 @@ async function sendEmail(env, subject, text) {
   console.log(JSON.stringify({ msg: "alert sent", subject, status: res.status }));
 }
 
+// Only problems are emailed. Recoveries reset the incident (so the next
+// failure alerts again) and show on the status page, but send no email.
 function backupAlertEmail(env, alert, state) {
-  const subject = { failure: "Pinove backup failed", overdue: "Pinove backup is overdue", recovered: "Pinove backup recovered" }[alert];
+  const subject = { failure: "Pinove backup failed", overdue: "Pinove backup is overdue" }[alert];
+  if (!subject) return Promise.resolve();
   const last = state.lastSuccess != null ? new Date(state.lastSuccess).toISOString() : "never";
   return sendEmail(env, subject, `${subject}.\n\nLast successful run: ${last}\nStatus page: ${env.PUBLIC_URL || ""}\n`);
 }
 
 function componentAlertEmail(env, a) {
   const name = COMPONENTS.find((c) => c.id === a.component)?.name ?? a.component;
-  const subject = a.kind === "down" ? `Pinove ${name}: ${a.status}` : `Pinove ${name} recovered`;
+  if (a.kind !== "down") return Promise.resolve();
+  const subject = `Pinove ${name}: ${a.status}`;
   return sendEmail(env, subject, `${subject}.\n\nStatus page: ${env.PUBLIC_URL || ""}\n`);
 }
 
