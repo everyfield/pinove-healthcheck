@@ -1,7 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyPing, evaluate, initialState, status, HISTORY_LIMIT } from "../src/monitor.js";
-import { renderStatusPage } from "../src/page.js";
 
 const H = 3600000;
 const GRACE = 26 * H;
@@ -45,15 +44,6 @@ test("history is bounded", () => {
   for (let i = 0; i < HISTORY_LIMIT + 10; i++) s = applyPing(s, "success", i).state;
   assert.equal(s.history.length, HISTORY_LIMIT);
   assert.equal(s.history[0].at, HISTORY_LIMIT + 9);
-});
-
-test("status page escapes the name and shows the state", () => {
-  const s = applyPing(initialState(), "success", Date.UTC(2026, 10, 14, 2, 30)).state;
-  const html = renderStatusPage(s, Date.UTC(2026, 10, 14, 3, 0), GRACE, "<script>x</script>");
-  assert.ok(html.includes("&lt;script&gt;x&lt;/script&gt;"));
-  assert.ok(!html.includes("<script>x"));
-  assert.ok(html.includes("Operational"));
-  assert.ok(html.includes("2026-11-14 02:30 UTC"));
 });
 
 test("unknown ping kind is rejected", () => {

@@ -4,8 +4,8 @@
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
-  // Check for a missing backup every 15 minutes.
-  "triggers": { "crons": ["*/15 * * * *"] },
+  // Check every component and the backup every 5 minutes.
+  "triggers": { "crons": ["*/5 * * * *"] },
   "durable_objects": {
     "bindings": [{ "name": "MONITOR", "class_name": "Monitor" }]
   },
@@ -14,7 +14,7 @@
     "MONITOR_NAME": "Pinove backup",
     "GRACE_HOURS": "26",
     "ALERT_FROM": "Pinove Monitor <monitor@pinove.com>",
-    "PUBLIC_URL": "https://status.pinove.com"
+    "PUBLIC_URL": "https://health.pinove.com"
   }
   // Secrets (set with `wrangler secret put` or in the dashboard, never here):
   //   PING_TOKEN      random token used in the ping URL

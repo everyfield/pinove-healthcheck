@@ -1,14 +1,20 @@
 # pinove-healthcheck
 
-Dead-man's switch and public status page for Pinove's daily encrypted backup.
-It runs as a Cloudflare Worker with one Durable Object (no database to
-create) and deploys from this repository.
+Public status page for Pinove (health.pinove.com) and the dead-man's switch
+for its daily encrypted backup. It runs as a Cloudflare Worker with one
+Durable Object (no database to create) and deploys from this repository.
 
-- `GET /`: public status page (Operational, Last run failed, Overdue).
+Every 5 minutes it checks the website, the console, and the API's
+`GET /v1/status` (API, database and build workers), plus the backup. A
+component must fail two checks in a row before it is shown as down. The page
+shows each component's state, 90 days of daily uptime and recent incidents.
+Outages and recoveries are emailed through Resend, once per incident.
+
+- `GET /`: public status page.
 - `GET /status.json`: the same as JSON.
 - `GET|POST /ping/<token>`: record a successful backup.
 - `GET|POST /ping/<token>/fail`: record a failed backup.
-- Every 15 minutes a cron check alerts when no success has arrived for
+- The backup counts as down when no success has arrived for
   `GRACE_HOURS` (26 by default). Alerts and recoveries go out by email through
   Resend, one per incident.
 
@@ -25,11 +31,11 @@ The token in the ping URL is a secret; the status page and JSON never show it.
    - `RESEND_API_KEY`: a Resend API key with sending access
    - `ALERT_TO`: where alerts go (comma-separated)
 3. Optional: **Settings → Domains & Routes** → add the custom domain
-   `status.pinove.com` (it matches `PUBLIC_URL` in `wrangler.jsonc`).
+   `health.pinove.com` (it matches `PUBLIC_URL` in `wrangler.jsonc`).
 4. On the Pinove host, add this line to `/etc/pinove/restic.env`:
 
    ```sh
-   PINOVE_BACKUP_PING_URL=https://status.pinove.com/ping/<PING_TOKEN>
+   PINOVE_BACKUP_PING_URL=https://health.pinove.com/ping/<PING_TOKEN>
    ```
 
    `deploy/scripts/backup.sh` pings it on success and calls `<url>/fail` on failure.
