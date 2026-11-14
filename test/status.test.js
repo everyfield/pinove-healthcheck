@@ -2,10 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyObservations, initialStatusState, observationsFrom, overall, uptime, DAYS_KEPT } from "../src/status.js";
 import { renderStatusPage } from "../src/page.js";
-import { initialState } from "../src/monitor.js";
 
 const MIN = 60000;
-const allUp = { website: "operational", console: "operational", api: "operational", database: "operational", build_workers: "operational", backups: "operational" };
+const allUp = { website: "operational", console: "operational", api: "operational", database: "operational", build_workers: "operational" };
 
 test("a single failed check does not open an incident; two do", () => {
   let s = applyObservations(initialStatusState(), allUp, 0).state;
@@ -39,16 +38,15 @@ test("uptime counts operational checks per day and keeps 90 days", () => {
 });
 
 test("unreachable API marks dependent components unknown, not down", () => {
-  const obs = observationsFrom({ websiteOk: true, consoleOk: true, apiStatus: null, backupStatus: "waiting" });
-  assert.deepEqual(obs, { website: "operational", console: "operational", backups: "unknown", api: "outage", database: "unknown", build_workers: "unknown" });
-  const ok = observationsFrom({ websiteOk: true, consoleOk: false, apiStatus: { components: { api: "operational", database: "operational", build_workers: "degraded" } }, backupStatus: "overdue" });
+  const obs = observationsFrom({ websiteOk: true, consoleOk: true, apiStatus: null });
+  assert.deepEqual(obs, { website: "operational", console: "operational", api: "outage", database: "unknown", build_workers: "unknown" });
+  const ok = observationsFrom({ websiteOk: true, consoleOk: false, apiStatus: { components: { api: "operational", database: "operational", build_workers: "degraded" } } });
   assert.equal(ok.console, "outage");
   assert.equal(ok.build_workers, "degraded");
-  assert.equal(ok.backups, "outage");
 });
 
 test("unexpected API values are treated as unknown", () => {
-  const obs = observationsFrom({ websiteOk: true, consoleOk: true, apiStatus: { components: { api: "<b>", database: 1 } }, backupStatus: "up" });
+  const obs = observationsFrom({ websiteOk: true, consoleOk: true, apiStatus: { components: { api: "<b>", database: 1 } } });
   assert.equal(obs.api, "unknown");
   assert.equal(obs.database, "unknown");
 });
@@ -57,7 +55,7 @@ test("status page renders components, headline and incidents", () => {
   let s = applyObservations(initialStatusState(), allUp, Date.UTC(2026, 10, 14)).state;
   s = applyObservations(s, { ...allUp, console: "outage" }, Date.UTC(2026, 10, 14, 0, 5)).state;
   s = applyObservations(s, { ...allUp, console: "outage" }, Date.UTC(2026, 10, 14, 0, 10)).state;
-  const html = renderStatusPage(s, initialState(), Date.UTC(2026, 10, 14, 0, 15));
+  const html = renderStatusPage(s, Date.UTC(2026, 10, 14, 0, 15));
   assert.ok(html.includes("Service disruption"));
   assert.ok(html.includes("Console"));
   assert.ok(html.includes("Ongoing"));
