@@ -4,20 +4,17 @@
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
-  // Check every component and the backup every 5 minutes.
+  // Check every component every 5 minutes.
   "triggers": { "crons": ["*/5 * * * *"] },
   "durable_objects": {
     "bindings": [{ "name": "MONITOR", "class_name": "Monitor" }]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Monitor"] }],
   "vars": {
-    "MONITOR_NAME": "Pinove backup",
-    "GRACE_HOURS": "26",
     "ALERT_FROM": "Pinove Monitor <monitor@pinove.com>",
     "PUBLIC_URL": "https://health.pinove.com"
   }
   // Secrets (set with `wrangler secret put` or in the dashboard, never here):
-  //   PING_TOKEN      random token used in the ping URL
   //   RESEND_API_KEY  Resend API key with sending access
   //   ALERT_TO        comma-separated alert recipients
 }

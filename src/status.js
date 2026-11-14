@@ -7,7 +7,6 @@ export const COMPONENTS = [
   { id: "api", name: "API" },
   { id: "database", name: "Database" },
   { id: "build_workers", name: "Build workers" },
-  { id: "backups", name: "Backups" },
 ];
 
 // States from best to worst; "unknown" means no data yet.
@@ -110,20 +109,14 @@ export function uptime(state, id) {
   return total ? (100 * up) / total : null;
 }
 
-/** Maps the backup dead-man's switch to a component state. */
-export function backupComponentState(backupStatus) {
-  return { up: "operational", overdue: "outage", failing: "outage", waiting: "unknown" }[backupStatus] ?? "unknown";
-}
-
 /**
  * Turns probe results into observations. `apiStatus` is the parsed JSON of
  * GET /v1/status, or null when the API could not be reached.
  */
-export function observationsFrom({ websiteOk, consoleOk, apiStatus, backupStatus }) {
+export function observationsFrom({ websiteOk, consoleOk, apiStatus }) {
   const obs = {
     website: websiteOk ? "operational" : "outage",
     console: consoleOk ? "operational" : "outage",
-    backups: backupComponentState(backupStatus),
   };
   if (!apiStatus || typeof apiStatus.components !== "object") {
     obs.api = "outage";

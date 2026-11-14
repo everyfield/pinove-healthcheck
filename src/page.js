@@ -50,7 +50,7 @@ function bars(state, id, now) {
 }
 
 /** Public status page: black and white, no client-side script. */
-export function renderStatusPage(state, backup, now) {
+export function renderStatusPage(state, now) {
   const head = overall(state);
   const rows = COMPONENTS.map(({ id, name }) => {
     const c = state.components[id] ?? { status: "unknown" };
@@ -103,11 +103,6 @@ export function renderStatusPage(state, backup, now) {
   <h1>Pinove status</h1>
   <p class="headline${head === "outage" || head === "degraded" ? " bad" : ""}">${HEADLINE[head]}</p>
   ${rows}
-  <h3>Backups</h3>
-  <dl>
-    <dt>Last success</dt><dd>${when(backup.lastSuccess)}</dd>
-    <dt>Last failure</dt><dd>${when(backup.lastFailure)}</dd>
-  </dl>
   <h3>Recent incidents</h3>
   ${incidents ? `<table>${incidents}</table>` : `<p class="small">No incidents recorded.</p>`}
   <p class="small" style="margin-top:40px">Checked every 5 minutes. Last check ${when(state.lastCheck ?? null)}.</p>
